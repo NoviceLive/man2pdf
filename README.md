@@ -1,12 +1,21 @@
 # man2pdf
 
-## May 31, 2015
+## Usage
 
-1. Added a shell script to automate the converting process.
+```
+./man2pdf path-to-man-pages-directories
+```
 
-2. Updated to man-pages-4.00.
+where the `path-to-man-pages-directories`
+is the root directories of the man pages release.
+
+## Dependencies
+
+- pdfroff, which comes from the package groff
+
+- [pdfbookmark](https://github.com/NoviceLive/pdfbookmark)
 
 ## TODO
 
-1. Adding the functionality of
+- Adding the functionality of
 producing the syscall-number-ordered version of man2.
