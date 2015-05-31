@@ -1,0 +1,2883 @@
+.\" Copyright (c) 2011, Mark R. Bannister <cambridge@users.sourceforge.net>
+.\" Copyright (c) 2015, Robin H. Johnson <robbat2@gentoo.org>
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.\"
+.TH GETENT 1 2015-04-19 "Linux" "User Commands"
+.SH NAME
+getent \- get entries from Name Service Switch libraries
+.SH SYNOPSIS
+.BR getent\ [\fIoption\fP]...\ \fIdatabase\fP\ \fIkey\fP...
+.SH DESCRIPTION
+The
+.B getent
+command displays entries from databases supported by the
+Name Service Switch libraries,
+which are configured in
+.IR /etc/nsswitch.conf .
+If one or more
+.I key
+arguments are provided,
+then only the entries that match the supplied keys will be displayed.
+Otherwise, if no
+.I key
+is provided, all entries will be displayed (unless the database does not
+support enumeration).
+.LP
+The
+.I database
+may be any of those supported by the GNU C Library, listed below:
+.RS 3
+.TP 10
+.B ahosts
+When no
+.I key
+is provided, use
+.BR sethostent (3),
+.BR gethostent (3),
+and
+.BR endhostent (3)
+to enumerate the hosts database.
+This is identical to using
+.BR hosts .
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR getaddrinfo (3)
+with the address family
+.BR AF_UNSPEC ,
+enumerating each socket address structure returned.
+.TP
+.B ahostsv4
+Same as
+.BR ahosts ,
+but use the address family
+.BR AF_INET .
+.TP
+.B ahostsv6
+Same as
+.BR ahosts ,
+but use the address family
+.BR AF_INET6 .
+The call to
+.BR getaddrinfo (3)
+in this case includes the
+.B AI_V4MAPPED
+flag.
+.TP
+.B aliases
+When no
+.I key
+is provided, use
+.BR setaliasent (3),
+.BR getaliasent (3),
+and
+.BR endaliasent (3)
+to enumerate the aliases database.
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR getaliasbyname (3)
+and display the result.
+.TP
+.B ethers
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR ether_aton (3)
+and
+.BR ether_hostton (3)
+until a result is obtained, and display the result.
+Enumeration is not supported on
+.BR ethers ,
+so a
+.I key
+must be provided.
+.TP
+.B group
+When no
+.I key
+is provided, use
+.BR setgrent (3),
+.BR getgrent (3),
+and
+.BR endgrent (3)
+to enumerate the group database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getgrgid (3)
+and each nonnumeric
+.I key
+to
+.BR getgrnam (3)
+and display the result.
+.TP
+.B gshadow
+When no
+.I key
+is provided, use
+.BR setsgent (3),
+.BR getsgent (3),
+and
+.BR endsgent (3)
+to enumerate the gshadow database.
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR getsgnam (3)
+and display the result.
+.TP
+.B hosts
+When no
+.I key
+is provided, use
+.BR sethostent (3),
+.BR gethostent (3),
+and
+.BR endhostent (3)
+to enumerate the hosts database.
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+to
+.BR gethostbyaddr (3)
+or
+.BR gethostbyname2 (3),
+depending on whether a call to
+.BR inet_pton (3)
+indicates that the
+.I key
+is an IPv6 or IPv4 address or not, and display the result.
+.TP
+.B initgroups
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR getgrouplist (3)
+and display the result.
+Enumeration is not supported on
+.BR initgroups ,
+so a
+.I key
+must be provided.
+.TP
+.B netgroup
+When one
+.I key
+is provided, pass the
+.I key
+to
+.BR setnetgrent (3)
+and, using
+.BR getnetgrent (3)
+display the resulting string triple
+.RI ( hostname ", " username ", " domainname ).
+Alternatively, three
+.I keys
+may be provided, which are interpreted as the
+.IR hostname ,
+.I username
+and
+.I domainname
+to match to a netgroup name via
+.BR innetgr (3).
+Enumeration is not supported on
+.BR netgroup ,
+so either one or three
+.I keys
+must be provided.
+.TP
+.B networks
+When no
+.I key
+is provided, use
+.BR setnetent (3),
+.BR getnetent (3),
+and
+.BR endnetent (3)
+to enumerate the networks database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getnetbyaddr (3)
+and each nonnumeric
+.I key
+to
+.BR getnetbyname (3)
+and display the result.
+.TP
+.B passwd
+When no
+.I key
+is provided, use
+.BR setpwent (3),
+.BR getpwent (3),
+and
+.BR endpwent (3)
+to enumerate the passwd database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getpwuid (3)
+and each nonnumeric
+.I key
+to
+.BR getpwnam (3)
+and display the result.
+.TP
+.B protocols
+When no
+.I key
+is provided, use
+.BR setprotoent (3),
+.BR getprotoent (3),
+and
+.BR endprotoent (3)
+to enumerate the protocols database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getprotobynumber (3)
+and each nonnumeric
+.I key
+to
+.BR getprotobyname (3)
+and display the result.
+.TP
+.B rpc
+When no
+.I key
+is provided, use
+.BR setrpcent (3),
+.BR getrpcent (3),
+and
+.BR endrpcent (3)
+to enumerate the rpc database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getrpcbynumber (3)
+and each nonnumeric
+.I key
+to
+.BR getrpcbyname (3)
+and display the result.
+.TP
+.B services
+When no
+.I key
+is provided, use
+.BR setservent (3),
+.BR getservent (3),
+and
+.BR endservent (3)
+to enumerate the services database.
+When one or more
+.I key
+arguments are provided, pass each numeric
+.I key
+to
+.BR getservbynumber (3)
+and each nonnumeric
+.I key
+to
+.BR getservbyname (3)
+and display the result.
+.TP
+.B shadow
+When no
+.I key
+is provided, use
+.BR setspent (3),
+.BR getspent (3),
+and
+.BR endspent (3)
+to enumerate the shadow database.
+When one or more
+.I key
+arguments are provided, pass each
+.I key
+in succession to
+.BR getspnam (3)
+and display the result.
+.RE
+.SH OPTIONS
+.TP
+.BR \-s\ \fIservice\fP, \-\-service\ \fIservice\fP
+.\" commit 9d0881aa76b399e6a025c5cf44bebe2ae0efa8af (glibc)
+Override all databases with the specified service.
+(Since glibc 2.2.5.)
+.TP
+.BR \-s\ \fIdatabase\fP:\fIservice\fP,\ \
+\-\-service\ \fIdatabase\fP:\fIservice\fP
+.\" commit b4f6f4be85d32b9c03361c38376e36f08100e3e8 (glibc)
+Override only specified databases with the specified service.
+The option may be used multiple times,
+but only the last service for each database will be used.
+(Since glibc 2.4.)
+.TP
+.BR \-i ", " \-\-no\-idn
+.\" commit a160f8d808cf8020b13bd0ef4a9eaf3c11f964ad (glibc)
+Disables IDN encoding in lookups for
+.BR ahosts / getaddrinfo (3)
+(Since glibc-2.13.)
+.TP
+.BR \-? ", " \-\-help
+Print a usage summary and exit.
+.TP
+.B "\-\-usage"
+Print a short usage summary and exit.
+.TP
+.BR \-V ", " \-\-version
+Print the version number, license, and disclaimer of warranty for
+.BR getent .
+.SH EXIT STATUS
+One of the following exit values can be returned by
+.BR getent :
+.RS 3
+.TP 10
+.B 0
+Command completed successfully.
+.TP
+.B 1
+Missing arguments, or
+.I database
+unknown.
+.TP
+.B 2
+One or more supplied
+.I key
+could not be found in the
+.IR database .
+.TP
+.B 3
+Enumeration not supported on this
+.IR database .
+.RE
+.SH SEE ALSO
+.BR nsswitch.conf (5)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+'\" t -*- coding: UTF-8 -*-
+.\"
+.\" Copyright (C) 2014 Marko Myllynen <myllynen@redhat.com>
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.\"
+.TH ICONV 1 2014-07-08 "GNU" "Linux User Manual"
+.SH NAME
+iconv \- convert text from one character encoding to another
+.SH SYNOPSIS
+.B iconv
+.RI [ options ]
+.RI "[-f " from-encoding "]"
+.RI "[-t " to-encoding "]"
+.RI [ inputfile ]...
+.SH DESCRIPTION
+The
+.B iconv
+program reads in text in one encoding and outputs the text in another
+encoding.
+If no input files are given, or if it is given as a dash (\-),
+.B iconv
+reads from standard input.
+If no output file is given,
+.B iconv
+writes to standard output.
+.PP
+If no
+.I from-encoding
+is given, the default is derived
+from the current locale's character encoding.
+If no
+.I to-encoding
+is given, the default is derived
+from the current locale's character
+encoding.
+.SH OPTIONS
+.TP
+.BI \-f " from-encoding" ", \-\-from-code=" from-encoding
+Use
+.I from-encoding
+for input characters.
+.TP
+.BI \-t " to-encoding" ", \-\-to-code=" to-encoding
+Use
+.I to-encoding
+for output characters.
+
+If the string
+.BR //IGNORE
+is appended to
+.IR to-encoding ,
+characters that cannot be converted are discarded and an error is
+printed after conversion.
+
+If the string
+.BR //TRANSLIT
+is appended to
+.IR to-encoding ,
+characters being converted are transliterated when needed and possible.
+This means that when a character cannot be represented in the target
+character set, it can be approximated through one or several similar
+looking characters.
+Characters that are outside of the target character set and cannot be
+transliterated are replaced with a question mark (?) in the output.
+.TP
+.BR \-l ", " \-\-list
+List all known character set encodings.
+.TP
+.B "\-c"
+Silently discard characters that cannot be converted instead of
+terminating when encountering such characters.
+.TP
+.BI \-o " outputfile" ", \-\-output=" outputfile
+Use
+.I outputfile
+for output.
+.TP
+.BR \-s ", " \-\-silent
+This option is ignored; it is provided only for compatibility.
+.TP
+.B "\-\-verbose"
+Print progress information on standard error when processing
+multiple files.
+.TP
+.BR \-? ", " \-\-help
+Print a usage summary and exit.
+.TP
+.B "\-\-usage"
+Print a short usage summary and exit.
+.TP
+.BR \-V ", " \-\-version
+Print the version number, license, and disclaimer of warranty for
+.BR iconv .
+.SH EXIT STATUS
+Zero on success, non-zero on errors.
+.SH ENVIRONMENT
+Internally, the
+.B iconv
+program uses the
+.BR iconv (3)
+function which in turn uses
+.I gconv
+modules (dynamically loaded shared libraries)
+to convert to and from a character set.
+Before calling
+.BR iconv (3),
+the
+.B iconv
+program must first allocate a conversion descriptor using
+.BR iconv_open (3).
+The operation of the latter function is influenced by the setting of the
+.B GCONV_PATH
+environment variable:
+.IP * 3
+If
+.B GCONV_PATH
+is not set,
+.BR iconv_open (3)
+loads the system gconv module configuration cache file created by
+.BR iconvconfig (8)
+and then, based on the configuration,
+loads the gconv modules needed to perform the conversion.
+If the system gconv module configuration cache file is not available
+then the system gconv module configuration file is used.
+.IP *
+If
+.B GCONV_PATH
+is defined (as a colon-separated list of pathnames),
+the system gconv module configuration cache is not used.
+Instead,
+.BR iconv_open (3)
+first tries to load the configuration files by searching the directories in
+.BR GCONV_PATH
+in order,
+followed by the system default gconv module configuration file.
+If a directory does not contain a gconv module configuration file,
+any gconv modules that it may contain are ignored.
+If a directory contains a gconv module configuration file
+and it is determined that a module needed for this conversion is
+available in the directory,
+then the needed module is loaded from that directory,
+the order being such that the first suitable module found in
+.B GCONV_PATH
+is used.
+This allows users to use custom modules and even replace system-provided
+modules by providing such modules in
+.B GCONV_PATH
+directories.
+.SH FILES
+.TP
+.I /usr/lib/gconv
+Usual default gconv module path.
+.TP
+.I /usr/lib/gconv/gconv-modules
+Usual system default gconv module configuration file.
+.TP
+.I /usr/lib/gconv/gconv-modules.cache
+Usual system gconv module configuration cache.
+.SH CONFORMING TO
+POSIX.1-2001.
+.SH EXAMPLE
+Convert text from the ISO 8859-15 character encoding to UTF-8:
+
+.in +4n
+.nf
+$ \fBiconv \-f ISO\-8859\-15 -t UTF\-8 < input.txt > output.txt\fP
+.fi
+.in
+.PP
+The next example converts from UTF-8 to ASCII, transliterating when
+possible:
+
+.in +4n
+.nf
+$ \fBecho abc ß α € àḃç | iconv \-f UTF\-8 \-t ASCII//TRANSLIT\fP
+abc ss ? EUR abc
+.fi
+.in
+.SH SEE ALSO
+.BR locale (1),
+.BR iconv (3),
+.BR nl_langinfo (3),
+.BR charsets (7),
+.BR iconvconfig (8)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (c) 2002 Andries Brouwer <aeb@cwi.nl>
+.\"
+.\" %%%LICENSE_START(VERBATIM)
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" %%%LICENSE_END
+.\"
+.\" 2007-10-23 mtk Added intro paragraph about section, plus a paragraph
+.\"     about exit status values.
+.\"
+.TH INTRO 1 2015-03-29 "Linux" "Linux User's Manual"
+.SH NAME
+intro \- introduction to user commands
+.SH DESCRIPTION
+Section 1 of the manual describes user commands and tools,
+for example, file manipulation tools, shells, compilers,
+web browsers, file and image viewers and editors, and so on.
+
+All commands yield a status value on termination.
+This value can be tested (e.g., in most shells the variable
+.I $?
+contains the status of the last executed command)
+to see whether the command completed successfully.
+A zero exit status is conventionally used to indicate success,
+and a nonzero status means that the command was unsuccessful.
+(Details of the exit status can be found in
+.BR wait (2).)
+A nonzero exit status can be in the range 1 to 255, and some commands
+use different nonzero status values to indicate the reason why the
+command failed.
+.SH NOTES
+Linux is a flavor of UNIX, and as a first approximation
+all user commands under UNIX work precisely the same under
+Linux (and FreeBSD and lots of other UNIX-like systems).
+.LP
+Under Linux, there are GUIs (graphical user interfaces), where you
+can point and click and drag, and hopefully get work done without
+first reading lots of documentation.
+The traditional UNIX environment
+is a CLI (command line interface), where you type commands to
+tell the computer what to do.
+That is faster and more powerful,
+but requires finding out what the commands are.
+Below a bare minimum, to get started.
+.SS Login
+In order to start working, you probably first have to open a session by
+giving, your username and password.
+The program
+.BR login (1)
+now starts a
+.I shell
+(command interpreter) for you.
+In case of a graphical login, you get a screen with menus or icons
+and a mouse click will start a shell in a window.
+See also
+.BR xterm (1).
+.SS The shell
+One types commands to the
+.IR shell ,
+the command interpreter.
+It is not built-in, but is just a program
+and you can change your shell.
+Everybody has her own favorite one.
+The standard one is called
+.IR sh .
+See also
+.BR ash (1),
+.BR bash (1),
+.BR chsh (1),
+.BR csh (1),
+.BR dash (1),
+.BR ksh (1),
+.BR zsh (1).
+.LP
+A session might go like:
+.LP
+.RS
+.nf
+.RB "knuth login: " aeb
+.RB "Password: " ********
+.RB "$ " date
+Tue Aug  6 23:50:44 CEST 2002
+.RB "$ " cal
+     August 2002
+Su Mo Tu We Th Fr Sa
+             1  2  3
+ 4  5  6  7  8  9 10
+11 12 13 14 15 16 17
+18 19 20 21 22 23 24
+25 26 27 28 29 30 31
+
+.RB "$ " ls
+bin  tel
+.RB "$ " "ls \-l"
+total 2
+drwxrwxr\-x   2 aeb       1024 Aug  6 23:51 bin
+\-rw\-rw\-r\-\-   1 aeb         37 Aug  6 23:52 tel
+.RB "$ " "cat tel"
+maja    0501\-1136285
+peter   0136\-7399214
+.RB "$ " "cp tel tel2"
+.RB "$ " "ls \-l"
+total 3
+drwxr\-xr\-x   2 aeb       1024 Aug  6 23:51 bin
+\-rw\-r\-\-r\-\-   1 aeb         37 Aug  6 23:52 tel
+\-rw\-r\-\-r\-\-   1 aeb         37 Aug  6 23:53 tel2
+.RB "$ " "mv tel tel1"
+.RB "$ " "ls \-l"
+total 3
+drwxr\-xr\-x   2 aeb       1024 Aug  6 23:51 bin
+\-rw\-r\-\-r\-\-   1 aeb         37 Aug  6 23:52 tel1
+\-rw\-r\-\-r\-\-   1 aeb         37 Aug  6 23:53 tel2
+.RB "$ " "diff tel1 tel2"
+.RB "$ " "rm tel1"
+.RB "$ " "grep maja tel2"
+maja    0501\-1136285
+$
+.fi
+.RE
+.LP
+Here typing Control-D ended the session.
+.LP
+The
+.B $
+here was the command prompt\(emit is the shell's way of indicating
+that it is ready for the next command.
+The prompt can be customized
+in lots of ways, and one might include stuff like username,
+machine name, current directory, time, and so on.
+An assignment PS1="What next, master? "
+would change the prompt as indicated.
+.LP
+We see that there are commands
+.I date
+(that gives date and time), and
+.I cal
+(that gives a calendar).
+.LP
+The command
+.I ls
+lists the contents of the current directory\(emit tells you what
+files you have.
+With a
+.I \-l
+option it gives a long listing,
+that includes the owner and size and date of the file, and the
+permissions people have for reading and/or changing the file.
+For example, the file "tel" here is 37 bytes long, owned by aeb
+and the owner can read and write it, others can only read it.
+Owner and permissions can be changed by the commands
+.I chown
+and
+.IR chmod .
+.LP
+The command
+.I cat
+will show the contents of a file.
+(The name is from "concatenate and print": all files given as
+parameters are concatenated and sent to "standard output"
+(see
+.BR stdout (3)),
+here
+the terminal screen.)
+.LP
+The command
+.I cp
+(from "copy") will copy a file.
+.LP
+The command
+.I mv
+(from "move"), on the other hand, only renames it.
+.LP
+The command
+.I diff
+lists the differences between two files.
+Here there was no output because there were no differences.
+.LP
+The command
+.I rm
+(from "remove") deletes the file, and be careful! it is gone.
+No wastepaper basket or anything.
+Deleted means lost.
+.LP
+The command
+.I grep
+(from "g/re/p") finds occurrences of a string in one or more files.
+Here it finds Maja's telephone number.
+.SS Pathnames and the current directory
+Files live in a large tree, the file hierarchy.
+Each has a
+.I "pathname"
+describing the path from the root of the tree (which is called
+.IR / )
+to the file.
+For example, such a full pathname might be
+.IR /home/aeb/tel .
+Always using full pathnames would be inconvenient, and the name
+of a file in the current directory may be abbreviated by giving
+only the last component.
+That is why
+.I /home/aeb/tel
+can be abbreviated
+to
+.I tel
+when the current directory is
+.IR /home/aeb .
+.LP
+The command
+.I pwd
+prints the current directory.
+.LP
+The command
+.I cd
+changes the current directory.
+.LP
+Try alternatively
+.I cd
+and
+.I pwd
+commands and explore
+.I cd
+usage: "cd", "cd .", "cd ..", "cd /" and "cd ~".
+.SS Directories
+The command
+.I mkdir
+makes a new directory.
+.LP
+The command
+.I rmdir
+removes a directory if it is empty, and complains otherwise.
+.LP
+The command
+.I find
+(with a rather baroque syntax) will find files with given name
+or other properties.
+For example, "find . \-name tel" would find
+the file
+.I tel
+starting in the present directory (which is called
+.IR . ).
+And "find / \-name tel" would do the same, but starting at the root
+of the tree.
+Large searches on a multi-GB disk will be time-consuming,
+and it may be better to use
+.BR locate (1).
+.SS Disks and filesystems
+The command
+.I mount
+will attach the filesystem found on some disk (or floppy, or CDROM or so)
+to the big filesystem hierarchy.
+And
+.I umount
+detaches it again.
+The command
+.I df
+will tell you how much of your disk is still free.
+.SS Processes
+On a UNIX system many user and system processes run simultaneously.
+The one you are talking to runs in the
+.IR foreground ,
+the others in the
+.IR background .
+The command
+.I ps
+will show you which processes are active and what numbers these
+processes have.
+The command
+.I kill
+allows you to get rid of them.
+Without option this is a friendly
+request: please go away.
+And "kill \-9" followed by the number
+of the process is an immediate kill.
+Foreground processes can often be killed by typing Control-C.
+.SS Getting information
+There are thousands of commands, each with many options.
+Traditionally commands are documented on
+.IR "man pages" ,
+(like this one), so that the command "man kill" will document
+the use of the command "kill" (and "man man" document the command "man").
+The program
+.I man
+sends the text through some
+.IR pager ,
+usually
+.IR less .
+Hit the space bar to get the next page, hit q to quit.
+.LP
+In documentation it is customary to refer to man pages
+by giving the name and section number, as in
+.BR man (1).
+Man pages are terse, and allow you to find quickly some forgotten
+detail.
+For newcomers an introductory text with more examples
+and explanations is useful.
+.LP
+A lot of GNU/FSF software is provided with info files.
+Type "info info"
+for an introduction on the use of the program
+.IR info .
+.LP
+Special topics are often treated in HOWTOs.
+Look in
+.I /usr/share/doc/howto/en
+and use a browser if you find HTML files there.
+.\"
+.\" Actual examples? Separate section for each of cat, cp, ...?
+.\" gzip, bzip2, tar, rpm
+.SH SEE ALSO
+.BR ash (1),
+.BR bash (1),
+.BR chsh (1),
+.BR csh (1),
+.BR dash (1),
+.BR ksh (1),
+.BR locate (1),
+.BR login (1),
+.BR man (1),
+.BR xterm (1),
+.BR zsh (1),
+.BR wait (2),
+.BR stdout (3),
+.BR man-pages (7),
+.BR standards (7)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright 1995-2000 David Engel (david@ods.com)
+.\" Copyright 1995 Rickard E. Faith (faith@cs.unc.edu)
+.\" Copyright 2000 Ben Collins (bcollins@debian.org)
+.\"    Redone for GLibc 2.2
+.\" Copyright 2000 Jakub Jelinek (jakub@redhat.com)
+.\"    Corrected.
+.\" Most of this was copied from the README file.
+.\"
+.\" %%%LICENSE_START(GPL_NOVERSION_ONELINE)
+.\" Do not restrict distribution.
+.\" May be distributed under the GNU General Public License
+.\" %%%LICENSE_END
+.\"
+.TH LDD 1 2015-03-29 "" "Linux Programmer's Manual"
+.SH NAME
+ldd \- print shared library dependencies
+.SH SYNOPSIS
+.BR ldd " [\fIoption\fP]... \fIfile\fP..."
+.SH DESCRIPTION
+.B ldd
+prints the shared libraries required by each program or shared library
+specified on the command line.
+.SS Security
+In the usual case,
+.B ldd
+invokes the standard dynamic linker (see
+.BR ld.so (8))
+with the
+.B LD_TRACE_LOADED_OBJECTS
+environment variable set to 1,
+which causes the linker to display the library dependencies.
+Be aware,
+however,
+that in some circumstances, some versions of
+.BR ldd
+may attempt to obtain the dependency information
+by directly executing the program.
+.\" Mainline glibc's ldd allows this possibility (the line
+.\"      try_trace "$file"
+.\" in glibc 2.15, for example), but many distro versions of
+.\" ldd seem to remove that code path from the script.
+Thus, you should
+.I never
+employ
+.B ldd
+on an untrusted executable,
+since this may result in the execution of arbitrary code.
+A safer alternative when dealing with untrusted executables is:
+
+    $ objdump \-p /path/to/program | grep NEEDED
+.SH OPTIONS
+.TP
+.B \-\-version
+Print the version number of
+.BR ldd .
+.TP
+.BR \-v ", " \-\-verbose
+Print all information, including, for example,
+symbol versioning information.
+.TP
+.BR \-u ", " \-\-unused
+Print unused direct dependencies.
+(Since glibc 2.3.4.)
+.TP
+.BR \-d ", " \-\-data\-relocs
+Perform relocations and report any missing objects (ELF only).
+.TP
+.BR \-r ", " \-\-function\-relocs
+Perform relocations for both data objects and functions, and
+report any missing objects or functions (ELF only).
+.TP
+.B \-\-help
+Usage information.
+.\" .SH NOTES
+.\" The standard version of
+.\" .B ldd
+.\" comes with glibc2.
+.\" Libc5 came with an older version, still present
+.\" on some systems.
+.\" The long options are not supported by the libc5 version.
+.\" On the other hand, the glibc2 version does not support
+.\" .B \-V
+.\" and only has the equivalent
+.\" .BR \-\-version .
+.\" .LP
+.\" The libc5 version of this program will use the name of a library given
+.\" on the command line as-is when it contains a \(aq/\(aq; otherwise it
+.\" searches for the library in the standard locations.
+.\" To run it
+.\" on a shared library in the current directory, prefix the name with "./".
+.SH BUGS
+.B ldd
+does not work on a.out shared libraries.
+.PP
+.B ldd
+does not work with some extremely old a.out programs which were
+built before
+.B ldd
+support was added to the compiler releases.
+If you use
+.B ldd
+on one of these programs, the program will attempt to run with
+.I argc
+= 0 and the results will be unpredictable.
+.\" .SH AUTHOR
+.\" David Engel.
+.\" Roland McGrath and Ulrich Drepper.
+.SH SEE ALSO
+.BR pldd (1),
+.BR sprof (1),
+.BR ld.so (8),
+.BR ldconfig (8)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (C) 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" %%%LICENSE_START(VERBATIM)
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" %%%LICENSE_END
+.\"
+.TH LOCALE 1 2014-05-28 "Linux" "Linux User Manual"
+.SH NAME
+locale \- get locale-specific information
+.SH SYNOPSIS
+.nf
+.BR locale " [\fIoption\fP]"
+.BR locale " [\fIoption\fP] \-a"
+.BR locale " [\fIoption\fP] \-m"
+.BR locale " [\fIoption\fP] \fIname\fP..."
+.fi
+.SH DESCRIPTION
+The
+.B locale
+command displays information about the current locale, or all locales,
+on standard output.
+
+When invoked without arguments,
+.B locale
+displays the current locale settings for each locale category (see
+.BR locale (5)),
+based on the settings of the environment variables that control the locale
+(see
+.BR locale (7)).
+
+If either the
+.B \-a
+or the
+.B \-m
+option (or one of their long-format equivalents) is specified,
+the behavior is as follows:
+.TP
+.BR \-a ", " \-\-all\-locales
+Display a list of all available locales.
+The
+.B -v
+option causes the
+.B LC_IDENTIFICATION
+metadata about each locale to be included in the output.
+.TP
+.BR \-m ", " \-\-charmaps
+Display the available charmaps (character set description files).
+.PP
+The
+.B locale
+command can also be provided with one or more arguments,
+which are the names of locale keywords (for example,
+.IR date_fmt ,
+.IR ctype-class-names ,
+.IR yesexpr ,
+or
+.IR decimal_point )
+or locale categories (for example,
+.BR LC_CTYPE
+or
+.BR LC_TIME ).
+For each argument, the following is displayed:
+.IP * 3
+For a locale keyword, the value of that keyword to be displayed.
+.IP *
+For a locale category,
+the values of all keywords in that category are displayed.
+.PP
+When arguments are supplied, the following options are meaningful:
+.TP
+.BR \-c ", " \-\-category\-name
+For a category name argument,
+write the name of the locale category
+on a separate line preceding the list of keyword values for that category.
+
+For a keyword name argument,
+write the name of the locale category for this keyword
+on a separate line preceding the keyword value.
+
+This option improves readability when multiple name arguments are specified.
+It can be combined with the
+.B \-k
+option.
+.TP
+.BR \-k ", " \-\-keyword\-name
+For each keyword whose value is being displayed,
+include also the name of that keyword,
+so that the output has the format:
+
+    \fIkeyword\fP="\fIvalue\fP"
+.PP
+The
+.B locale
+command also knows about the following options:
+.TP
+.BR \-v ", " \-\-verbose
+Display additional information for some command-line option and argument
+combinations.
+.TP
+.BR \-? ", " \-\-help
+Display a summary of command-line options and arguments and exit.
+.TP
+.BR \-\-usage
+Display a short usage message and exit.
+.TP
+.BR \-V ", " \-\-version
+Display the program version and exit.
+.SH FILES
+.TP
+.I /usr/lib/locale/locale-archive
+Usual default locale archive location.
+.TP
+.I /usr/share/i18n/locales
+Usual default path for locale definition files.
+.SH CONFORMING TO
+POSIX.1-2001, POSIX.1-2008.
+.SH EXAMPLE
+.nf
+$ \fBlocale\fP
+LANG=en_US.UTF\-8
+LC_CTYPE="en_US.UTF\-8"
+LC_NUMERIC="en_US.UTF\-8"
+LC_TIME="en_US.UTF\-8"
+LC_COLLATE="en_US.UTF\-8"
+LC_MONETARY="en_US.UTF\-8"
+LC_MESSAGES="en_US.UTF\-8"
+LC_PAPER="en_US.UTF\-8"
+LC_NAME="en_US.UTF\-8"
+LC_ADDRESS="en_US.UTF\-8"
+LC_TELEPHONE="en_US.UTF\-8"
+LC_MEASUREMENT="en_US.UTF\-8"
+LC_IDENTIFICATION="en_US.UTF\-8"
+LC_ALL=
+
+$ \fBlocale date_fmt\fP
+%a %b %e %H:%M:%S %Z %Y
+
+$ \fBlocale \-k date_fmt\fP
+date_fmt="%a %b %e %H:%M:%S %Z %Y"
+
+$ \fBlocale \-ck date_fmt\fP
+LC_TIME
+date_fmt="%a %b %e %H:%M:%S %Z %Y"
+
+$ \fBlocale LC_TELEPHONE\fP
++%c (%a) %l
+(%a) %l
+11
+1
+UTF\-8
+
+$ \fBlocale \-k LC_TELEPHONE\fP
+tel_int_fmt="+%c (%a) %l"
+tel_dom_fmt="(%a) %l"
+int_select="11"
+int_prefix="1"
+telephone\-codeset="UTF\-8"
+.fi
+
+The following example compiles a custom locale from the
+.I ./wrk
+directory with the
+.BR localedef (1)
+utility under the
+.I $HOME/.locale
+directory, then tests the result with the
+.BR date (1)
+command, and then sets the environment variables
+.B LOCPATH
+and
+.B LANG
+in the shell profile file so that the custom locale will be used in the
+subsequent user sessions:
+
+.nf
+$ \fBmkdir -p $HOME/.locale\fP
+$ \fBI18NPATH=./wrk/ localedef -f UTF-8 -i fi_SE $HOME/.locale/fi_SE.UTF-8\fP
+$ \fBLOCPATH=$HOME/.locale LC_ALL=fi_SE.UTF-8 date\fP
+$ \fBecho "export LOCPATH=\\$HOME/.locale" >> $HOME/.bashrc\fP
+$ \fBecho "export LANG=fi_SE.UTF-8" >> $HOME/.bashrc\fP
+.fi
+.SH SEE ALSO
+.BR localedef (1),
+.BR charmap (5),
+.BR locale (5),
+.BR locale (7)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (C) 2001 Richard Braakman
+.\" Copyright (C) 2004 Alastair McKinstry
+.\" Copyright (C) 2005 Lars Wirzenius
+.\" Copyright (C) 2014 Marko Myllynen
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.\"
+.\" This manual page was initially written by Richard Braakman
+.\" on behalf of the Debian GNU/Linux Project and anyone else
+.\" who wants it. It was amended by Alastair McKinstry to
+.\" explain new ISO 14652 elements, and amended further by
+.\" Lars Wirzenius to document new functionality (as of GNU
+.\" C library 2.3.5).
+.\"
+.TH LOCALEDEF 1 2014-12-31 "Linux" "Linux User Manual"
+.SH NAME
+localedef \- compile locale definition files
+.SH SYNOPSIS
+.ad l
+.nh
+.B localedef
+.RI [ options ]
+.I outputpath
+.br
+.B "localedef \-\-list\-archive"
+.RI [ options ]
+.br
+.B "localedef \-\-delete\-from\-archive"
+.RI [ options ]
+.IR localename " ..."
+.br
+.B "localedef \-\-add\-to\-archive"
+.RI [ options ]
+.IR compiledpath
+.br
+.B "localedef \-\-version"
+.br
+.B "localedef \-\-help"
+.br
+.B "localedef \-\-usage"
+.ad b
+.hy
+.SH DESCRIPTION
+The
+.B localedef
+program reads the indicated
+.I charmap
+and
+.I input
+files, compiles them to a binary form quickly usable by the
+locale functions in the C library
+.RB ( setlocale (3),
+.BR localeconv (3),
+etc.), and places the output in
+.IR outputpath .
+
+The
+.I outputpath
+argument is interpreted as follows:
+.IP * 3
+If
+.I outputpath
+contains a slash character ('/'), it is interpreted as the name of the
+directory where the output definitions are to be stored.
+In this case, there is a separate output file for each locale category
+.RI ( LC_CTIME ,
+.IR LC_NUMERIC ,
+and so on).
+.IP *
+If the
+.B \-\-no\-archive
+option is used,
+.I outputpath
+is the name of a subdirectory in
+.I /usr/lib/locale
+where per-category compiled files are placed.
+.IP *
+Otherwise,
+.I outputpath
+is the name of a locale and the compiled locale data is added to the
+archive file
+.IR /usr/lib/locale/locale-archive .
+A locale archive is a memory-mapped file which contains all the
+system-provided locales;
+it is used by all localized programs when the environment variable
+.B LOCPATH
+is not set.
+.PP
+In any case,
+.B localedef
+aborts if the directory in which it tries to write locale files has
+not already been created.
+.PP
+If no
+.I charmapfile
+is given, the value
+.I ANSI_X3.4-1968
+(for ASCII) is used by default.
+If no
+.I inputfile
+is given, or if it is given as a dash
+(\-),
+.B localedef
+reads from standard input.
+.SH OPTIONS
+.SS Operation-selection options
+A few options direct
+.B localedef
+to do something other than compile locale definitions.
+Only one of these options should be used at a time.
+.TP
+.B \-\-delete\-from\-archive
+Delete the named locales from the locale archive file.
+.TP
+.B \-\-list\-archive
+List the locales contained in the locale archive file.
+.TP
+.B \-\-add\-to\-archive
+Add the
+.I compiledpath
+directories to the locale archive file.
+The directories should have been created by previous runs of
+.BR localedef ,
+using
+.BR \-\-no\-archive .
+.SS Other options
+Some of the following options are only sensible for certain operations;
+generally, it should be self-evident which ones.
+.TP
+.BI \-f " charmapfile" ", \-\-charmap=" charmapfile
+Specify the file that defines the character set
+that is used by the input file.
+If
+.I charmapfile
+contains a slash character ('/'),
+it is interpreted as the name of the character map.
+Otherwise, the file is sought in the current directory
+and the default directory for character maps.
+If the environment variable
+.B I18NPATH
+is set,
+.I $I18NPATH/charmaps/
+and
+.I $I18NPATH/
+are also searched after the current directory.
+The default directory for character maps is printed by
+.BR "localedef \-\-help" .
+.TP
+.BI \-i " inputfile" ", \-\-inputfile=" inputfile
+Specify the locale definition file to compile.
+The file is sought in the current directory
+and the default directory for locale definition files.
+If the environment variable
+.B I18NPATH
+is set,
+.I $I18NPATH/locales/
+and
+.I $I18NPATH
+are also searched after the current directory.
+The default directory for locale definition files is printed by
+.BR "localedef \-\-help" .
+.TP
+.BI \-u " repertoirefile" ", \-\-repertoire-map=" repertoirefile
+Read mappings from symbolic names to Unicode code points from
+.IR repertoirefile .
+If
+.I repertoirefile
+contains a slash character ('/'),
+it is interpreted as the pathname of the repertoire map.
+Otherwise, the file is sought in the current directory
+and the default directory for repertoire maps.
+If the environment variable
+.B I18NPATH
+is set,
+.I $I18NPATH/repertoiremaps/
+and
+.I $I18NPATH
+are also searched after the current directory.
+The default directory for repertoire maps is printed by
+.BR "localedef \-\-help" .
+.TP
+.BI \-A " aliasfile" ", \-\-alias\-file=" aliasfile
+Use
+.I aliasfile
+to look up aliases for locale names.
+There is no default aliases file.
+.TP
+.BI \-\-prefix= pathname
+Set the prefix to be prepended to the full archive pathname.
+By default, the prefix is empty.
+Setting the prefix to
+.IR foo ,
+the archive would be placed in
+.IR foo/usr/lib/locale/locale-archive .
+.TP
+.BR \-c ", " \-\-force
+Write the output files even if warnings were generated about the input
+file.
+.TP
+.B \-\-old\-style
+Create old-style hash tables instead of 3-level access tables.
+.TP
+.BR \-v ", " \-\-verbose
+Generate extra warnings about errors that are normally ignored.
+.TP
+.B \-\-quiet
+Suppress all notifications and warnings, and report only fatal errors.
+.TP
+.B \-\-posix
+Conform strictly to POSIX.  Implies
+.BR \-\-verbose .
+This option currently has no other effect.
+POSIX conformance is assumed if the environment variable
+.B POSIXLY_CORRECT
+is set.
+.TP
+.B \-\-replace
+Replace a locale in the locale archive file.
+Without this option, if the locale is in the archive file already,
+an error occurs.
+.TP
+.B \-\-no\-archive
+Do not use the locale archive file, instead create
+.I outputpath
+as a subdirectory in the same directory as the locale archive file,
+and create separate output files for locale categories in it.
+.TP
+.BR \-? ", " \-\-help
+Print a usage summary and exit.
+Also prints the default paths used by
+.BR localedef .
+.TP
+.B "\-\-usage"
+Print a short usage summary and exit.
+.TP
+.BR \-V ", " \-\-version
+Print the version number, license, and disclaimer of warranty for
+.BR localedef .
+.SH EXIT STATUS
+One of the following exit values can be returned by
+.BR localedef :
+.RS 3
+.TP 10
+.B 0
+Command completed successfully.
+.TP
+.B 1
+Warnings or errors occurred, output files were written.
+.TP
+.B 4
+Errors encountered, no output created.
+.RE
+.SH ENVIRONMENT
+.TP
+.B POSIXLY_CORRECT
+The
+.B \-\-posix
+flag is assumed if this environment variable is set.
+.TP
+.B I18NPATH
+A colon-separated list of search directories for files.
+.SH FILES
+.TP
+.I /usr/share/i18n/charmaps
+Usual default character map path.
+.TP
+.I /usr/share/i18n/locales
+Usual default path for locale definition files.
+.TP
+.I /usr/share/i18n/repertoiremaps
+Usual default repertoire map path.
+.TP
+.I /usr/lib/locale/locale-archive
+Usual default locale archive location.
+.TP
+.I /usr/lib/locale
+Usual default path for compiled individual locale data files.
+.TP
+.I outputpath/LC_ADDRESS
+An output file that contains information about formatting of
+addresses and geography-related items.
+.TP
+.I outputpath/LC_COLLATE
+An output file that contains information about the rules for comparing
+strings.
+.TP
+.I outputpath/LC_CTYPE
+An output file that contains information about character classes.
+.TP
+.I outputpath/LC_IDENTIFICATION
+An output file that contains metadata about the locale.
+.TP
+.I outputpath/LC_MEASUREMENT
+An output file that contains information about locale measurements
+(metric versus US customary).
+.TP
+.I outputpath/LC_MESSAGES/SYS_LC_MESSAGES
+An output file that contains information about the language messages
+should be printed in, and what an affirmative or negative answer looks
+like.
+.TP
+.I outputpath/LC_MONETARY
+An output file that contains information about formatting of monetary
+values.
+.TP
+.I outputpath/LC_NAME
+An output file that contains information about salutations for persons.
+.TP
+.I outputpath/LC_NUMERIC
+An output file that contains information about formatting of nonmonetary
+numeric values.
+.TP
+.I outputpath/LC_PAPER
+An output file that contains information about settings related to
+standard paper size.
+.TP
+.I outputpath/LC_TELEPHONE
+An output file that contains information about formats to be used with
+telephone services.
+.TP
+.I outputpath/LC_TIME
+An output file that contains information about formatting of data and
+time values.
+.SH CONFORMING TO
+POSIX.1-2008.
+.SH EXAMPLE
+Compile the locale files for Finnish in the UTF\-8 character set
+and add it to the default locale archive with the name
+.BR fi_FI.UTF\-8 :
+.PP
+.RS
+localedef \-f UTF\-8 \-i fi_FI fi_FI.UTF\-8
+.RE
+.PP
+The next example does the same thing, but generates files into the
+.I fi_FI.UTF\-8
+directory which can then be used by programs when the environment
+variable
+.B LOCPATH
+is set to the current directory (note that the last argument must
+contain a slash):
+.PP
+.RS
+localedef \-f UTF\-8 \-i fi_FI ./fi_FI.UTF\-8
+.RE
+.SH SEE ALSO
+.BR locale (1),
+.BR charmap (5),
+.BR locale (5),
+.BR repertoiremap (5),
+.BR locale (7)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (c) 2013, Peter Schiffer <pschiffe@redhat.com>
+.\" and Copyright (C) 2014, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.TH MEMUSAGE 1 2014-09-06 "GNU" "Linux user manual"
+.SH NAME
+memusage \- profile memory usage of a program
+.SH SYNOPSIS
+.BR memusage " [\fIoption\fR]... \fIprogram\fR [\fIprogramoption\fR]..."
+.SH DESCRIPTION
+.B memusage
+is a bash script which profiles memory usage of the program,
+.IR program .
+It preloads the
+.B libmemusage.so
+library into the caller's environment (via the
+.B LD_PRELOAD
+environment variable; see
+.BR ld.so (8)).
+The
+.B libmemusage.so
+library traces memory allocation by intercepting calls to
+.BR malloc (3),
+.BR calloc (3),
+.BR free (3),
+and
+.BR realloc (3);
+optionally, calls to
+.BR mmap (2),
+.BR mremap (2),
+and
+.BR munmap (2)
+can also be intercepted.
+.PP
+.B memusage
+can output the collected data in textual form, or it can use
+.BR memusagestat (1)
+(see the
+.B -p
+option,  below)
+to create a PNG file containing graphical representation
+of the collected data.
+.SS Memory usage summary
+The "Memory usage summary" line output by
+.BR memusage
+contains three fields:
+.RS 4
+.TP
+\fBheap total\fR
+Sum of \fIsize\fR arguments of all
+.BR malloc (3)
+calls,
+products of arguments (\fInmemb\fR*\fIsize\fR) of all
+.BR calloc (3)
+calls,
+and sum of \fIlength\fR arguments of all
+.BR mmap (2)
+calls.
+In the case of
+.BR realloc (3)
+and
+.BR mremap (2),
+if the new size of an allocation is larger than the previous size,
+the sum of all such differences (new size minus old size) is added.
+.TP
+.B "heap peak"
+Maximum of all \fIsize\fR arguments of
+.BR malloc (3),
+all products of \fInmemb\fR*\fIsize\fR of
+.BR calloc (3),
+all \fIsize\fR arguments of
+.BR realloc (3),
+.I length
+arguments of
+.BR mmap (2),
+and
+\fInew_size\fR arguments of
+.BR mremap (2).
+.TP
+.B "stack peak"
+Before the first call to any monitored function,
+the stack pointer address (base stack pointer) is saved.
+After each function call, the actual stack pointer address is read and
+the difference from the base stack pointer computed.
+The maximum of these differences is then the stack peak.
+.RE
+.PP
+Immediately following this summary line, a table shows the number calls,
+total memory allocated or deallocated,
+and number of failed calls for each intercepted function.
+For
+.BR realloc (3)
+and
+.BR mremap (2),
+the additional field "nomove" shows reallocations that
+changed the address of a block,
+and the additional "dec" field shows reallocations that
+decreased the size of the block.
+For
+.BR realloc (3),
+the additional field "free" shows reallocations that
+caused a block to be freed (i.e., the reallocated size was 0).
+
+
+The "realloc/total memory" of the table output by
+.B memusage
+does not reflect cases where
+.BR realloc (3)
+is used to reallocate a block of memory
+to have a smaller size than previously.
+This can cause sum of all "total memory" cells (excluding "free")
+to be larger than the "free/total memory" cell.
+.SS Histogram for block sizes
+The "Histogram for block sizes" provides a breakdown of memory
+allocations into various bucket sizes.
+.SH OPTIONS
+.TP
+.BI \-n\  name \fR,\ \fB\-\-progname= name
+Name of the program file to profile.
+.TP
+.BI \-p\  file \fR,\ \fB\-\-png= file
+Generate PNG graphic and store it in
+.IR file .
+.TP
+.BI \-d\  file \fR,\ \fB\-\-data= file
+Generate binary data file and store it in
+.IR file .
+.TP
+.BI \-u\fR,\ \fB\-\-unbuffered
+Do not buffer output.
+.TP
+.BI \-b\  size \fR,\ \fB\-\-buffer= size
+Collect
+.I size
+entries before writing them out.
+.TP
+.BI \fB\-\-no-timer
+Disable timer-based
+.RB ( SIGPROF )
+sampling of stack pointer value.
+.TP
+.BI \-m\fR,\ \fB\-\-mmap
+Also trace
+.BR mmap (2),
+.BR mremap (2),
+and
+.BR munmap (2).
+.TP
+.BI \-?\fR,\ \fB\-\-help
+Print help and exit.
+.TP
+.BI \fB\-\-usage
+Print a short usage message and exit.
+.TP
+.BI \-V\fR,\ \fB\-\-version
+Print version information and exit.
+.TP
+The following options apply only when generating graphical output:
+.TP
+.BI \-t\fR,\ \fB\-\-time\-based
+Use time (rather than number of function calls) as the scale for the X axis.
+.TP
+.BI \-T\fR,\ \fB\-\-total
+Also draw a graph of total memory use.
+.TP
+.BI \fB\-\-title= name
+Use
+.I name
+as the title of the graph.
+.TP
+.BI \-x\  size \fR,\ \fB\-\-x\-size= size
+Make the graph
+.I size
+pixels wide.
+.TP
+.BI \-y\  size \fR,\ \fB\-\-y\-size= size
+Make the graph
+.I size
+pixels high.
+.SH EXIT STATUS
+Exit status is equal to the exit status of profiled program.
+.SH EXAMPLE
+Below is a simple program that reallocates a block of
+memory in cycles that rise to a peak before then cyclically
+reallocating the memory in smaller blocks that return to zero.
+After compiling the program and running the following commands,
+a graph of the memory usage of the program can be found in the file
+.IR memusage.png :
+
+.in +4n
+.nf
+$ \fBmemusage --data=memusage.dat ./a.out\fP
+\&...
+Memory usage summary: heap total: 45200, heap peak: 6440, stack peak: 224
+        total calls  total memory  failed calls
+ malloc|         1           400             0
+realloc|        40         44800             0  (nomove:40, dec:19, free:0)
+ calloc|         0             0             0
+   free|         1           440
+Histogram for block sizes:
+  192-207             1   2% ================
+\&...
+ 2192-2207            1   2% ================
+ 2240-2255            2   4% =================================
+ 2832-2847            2   4% =================================
+ 3440-3455            2   4% =================================
+ 4032-4047            2   4% =================================
+ 4640-4655            2   4% =================================
+ 5232-5247            2   4% =================================
+ 5840-5855            2   4% =================================
+ 6432-6447            1   2% ================
+$ \fBmemusagestat memusage.dat memusage.png\fP
+.fi
+.in
+.SS Program source
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CYCLES 20
+
+int
+main(int argc, char *argv[])
+{
+     int i, j;
+     int *p;
+
+     printf("malloc: %zd\\n", sizeof(int) * 100);
+     p = malloc(sizeof(int) * 100);
+
+     for (i = 0; i < CYCLES; i++) {
+         if (i < CYCLES / 2)
+             j = i;
+         else
+             j--;
+
+         printf("realloc: %zd\\n", sizeof(int) * (j * 50 + 110));
+         p = realloc(p, sizeof(int) * (j * 50 + 100));
+
+         printf("realloc: %zd\\n", sizeof(int) * ((j+1) * 150 + 110));
+         p = realloc(p, sizeof(int) * ((j + 1) * 150 + 110));
+     }
+
+     free(p);
+     exit(EXIT_SUCCESS);
+}
+.fi
+.SH BUGS
+To report bugs, see
+.UR http://www.gnu.org/software/libc/bugs.html
+.UE
+.SH SEE ALSO
+.BR memusagestat (1),
+.BR mtrace (1)
+.BR ld.so (8)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (c) 2013, Peter Schiffer <pschiffe@redhat.com>
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.TH MEMUSAGESTAT 1 2014-09-06 "GNU" "Linux programmer's manual"
+.SH NAME
+memusagestat \- generate graphic from memory profiling data
+.SH SYNOPSIS
+.BR memusagestat " [\fIoption\fR]... \fIdatafile\fR [\fIoutfile\fR]"
+.SH DESCRIPTION
+.B memusagestat
+creates a PNG file containing a graphical representation of the
+memory profiling data in the file
+.IR datafile ;
+that file is generated via the
+.I -d
+(or
+.IR --data )
+option of
+.BR memusage (1).
+
+The red line in the graph shows the heap usage (allocated memory)
+and the green line shows the stack usage.
+The x-scale is either the number of memory-handling function calls or
+(if the
+.I -t
+option is specified)
+time.
+.SH OPTIONS
+.TP
+.BI \-o\  file \fR,\ \fB\-\-output= file
+Name of the output file.
+.TP
+.BI \-s\  string \fR,\ \fB\-\-string= string
+Use
+.I string
+as the title inside the output graph.
+.TP
+.BI \-t\fR,\ \fB\-\-time
+Use time (rather than number of function calls) as the scale for the X axis.
+.TP
+.BI \-T\fR,\ \fB\-\-total
+Also draw a graph of total memory consumption.
+.TP
+.BI \-x\  size \fR,\ \fB\-\-x-size= size
+Make the output graph
+.I size
+pixels wide.
+.TP
+.BI \-y\  size \fR,\ \fB\-\-y\-size= size
+Make the output graph
+.I size
+pixels high.
+.TP
+.BI \-?\fR,\ \fB\-\-help
+Print a help message and exit.
+.TP
+.BI \fB\-\-usage
+Print a short usage message and exit.
+.TP
+.BI \-V\fR,\ \fB\-\-version
+Print version information and exit.
+.SH EXAMPLE
+See
+.BR memusage (1).
+.SH BUGS
+To report bugs, see
+.UR http://www.gnu.org/software/libc/bugs.html
+.UE
+.SH SEE ALSO
+.BR memusage (1),
+.BR mtrace (1)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (c) 2013, Peter Schiffer (pschiffe@redhat.com)
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+.TH MTRACE 1 2014-09-01 "GNU" "Linux user manual"
+.SH NAME
+mtrace \- interpret the malloc trace log
+.SH SYNOPSIS
+.BR mtrace " [\fIoption\fR]... [\fIbinary\fR] \fImtracedata\fR"
+.SH DESCRIPTION
+.B mtrace
+is a Perl script used to interpret and provide human readable output
+of the trace log contained in the file
+.IR mtracedata ,
+whose contents were produced by
+.BR mtrace (3).
+If
+.I binary
+is provided, the output of
+.B mtrace
+also contains the source file name with line number information
+for problem locations
+(assuming that
+.I binary
+was compiled with debugging information).
+
+For more information about the
+.BR mtrace (3)
+function and
+.B mtrace
+script usage, see
+.BR mtrace (3).
+.SH OPTIONS
+.TP
+.BI \fB\-\-help
+Print help and exit.
+.TP
+.BI \fB\-\-version
+Print version information and exit.
+.SH BUGS
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/libc/bugs.html>.
+.SH SEE ALSO
+.BR memusage (1),
+.BR mtrace (3)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (C) 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" %%%LICENSE_START(VERBATIM)
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" %%%LICENSE_END
+.\"
+.TH PLDD 1 2014-09-27 "GNU" "Linux User Manual"
+.SH NAME
+pldd \- display dynamic shared objects linked into a process
+.SH SYNOPSIS
+.nf
+.BI "pldd " "pid"
+.BI pldd " option"
+.fi
+.SH DESCRIPTION
+The
+.B pldd
+command displays a list of the dynamic shared objects that are
+linked into the process with the specified process ID.
+The list includes the libraries that have been dynamically loaded using
+.BR dlopen (3).
+.SH OPTIONS
+.TP
+.BR \-? ", " \-\-help
+Display program help message.
+.TP
+.BR \-\-usage
+Display a short usage message.
+.TP
+.BR \-V ", " \-\-version
+Display the program version.
+.SH VERSIONS
+.B pldd
+is available since glibc 2.15.
+.SH CONFORMING TO
+The
+.B pldd
+command is not specified by POSIX.1.
+Some other systems
+.\" There are man pages on Solaris and HP-UX.
+have a similar command.
+.SH EXIT STATUS
+On success,
+.B pldd
+exits with the status 0.
+If the specified process does not exist,
+the user does not have permission to access
+its dynamic shared object list,
+or no command-line arguments are supplied,
+.B pldd
+exists with a status of 1.
+If given an invalid option, it exits with the status 64.
+.SH EXAMPLE
+.nf
+$ \fBecho $$\fP               # Display PID of shell
+1143
+$ \fBpldd $$\fP               # Display DSOs linked into the shell
+1143:	/usr/bin/bash
+linux\-vdso.so.1
+/lib64/libtinfo.so.5
+/lib64/libdl.so.2
+/lib64/libc.so.6
+/lib64/ld\-linux\-x86\-64.so.2
+/lib64/libnss_files.so.2
+.fi
+.SH NOTES
+The command
+
+     lsof -p PID
+
+also shows output that includes the dynamic shared objects
+that are linked into a process.
+.SH SEE ALSO
+.BR ldd (1),
+.BR lsof (1),
+.BR dlopen (3),
+.BR ld.so (8)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright (C) 2014 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" %%%LICENSE_START(VERBATIM)
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" %%%LICENSE_END
+.\"
+.TH SPROF 1 2014-06-24 "Linux" "Linux User Manual"
+.SH NAME
+sprof \- read and display shared object profiling data
+.SH SYNOPSIS
+.nf
+.BR sprof " [\fIoption\fP]... \fIshared-object-path\fP \
+[\fIprofile-data-path\fP]"
+.fi
+.SH DESCRIPTION
+The
+.B sprof
+command displays a profiling summary for the
+shared object specified as its first command-line argument.
+The profiling summary is created using previously generated
+profiling data in the (optional) second command-line argument.
+If the profiling data pathname is omitted, then
+.B sprof
+will attempt to deduce it using the soname of the shared object,
+looking for a file with the name
+.IR <soname>.profile
+in the current directory.
+.SH OPTIONS
+The following command-line options specify the profile output
+to be produced:
+.TP
+.BR \-c ", " \-\-call\-pairs
+Print a list of pairs of call paths for the interfaces exported
+by the shared object,
+along with the number of times each path is used.
+.TP
+.BR \-p ", " \-\-flat\-profile
+Generate a flat profile of all of the functions in the monitored object,
+with counts and ticks.
+.TP
+.BR \-q ", " \-\-graph
+Generate a call graph.
+.PP
+If none of the above options is specified,
+then the default behavior is to display a flat profile and a call graph.
+.PP
+The following additional command-line options are available:
+.TP
+.BR \-? ", " \-\-help
+Display a summary of command-line options and arguments and exit.
+.TP
+.BR \-\-usage
+Display a short usage message and exit.
+.TP
+.BR \-V ", " \-\-version
+Display the program version and exit.
+.SH CONFORMING TO
+The
+.B sprof
+command is a GNU extension, not present in POSIX.1.
+.SH EXAMPLE
+The following example demonstrates the use of
+.BR sprof .
+The example consists of a main program that calls two functions
+in a shared library.
+First, the code of the main program:
+
+.in +4n
+.nf
+$ \fBcat prog.c\fP
+#include <stdlib.h>
+
+void x1(void);
+void x2(void);
+
+int
+main(int argc, char *argv[])
+{
+    x1();
+    x2();
+    exit(EXIT_SUCCESS);
+}
+.fi
+.in
+.PP
+The functions
+.IR x1()
+and
+.IR x2()
+are defined in the following source file that is used to
+construct the shared library:
+
+.in +4n
+.nf
+$ \fBcat libdemo.c\fP
+#include <unistd.h>
+
+void
+consumeCpu1(int lim)
+{
+    int j;
+
+    for (j = 0; j < lim; j++)
+	getppid();
+}
+
+void
+x1(void) {
+    int j;
+
+    for (j = 0; j < 100; j++)
+	consumeCpu1(200000);
+}
+
+void
+consumeCpu2(int lim)
+{
+    int j;
+
+    for (j = 0; j < lim; j++)
+	getppid();
+}
+
+void
+x2(void)
+{
+    int j;
+
+    for (j = 0; j < 1000; j++)
+	consumeCpu2(10000);
+}
+.fi
+.in
+.PP
+Now we construct the shared library with the real name
+.IR libdemo.so.1.0.1 ,
+and the soname
+.IR libdemo.so.1 :
+
+.in +4n
+.nf
+$ \fBcc \-g \-fPIC \-shared \-Wl,\-soname,libdemo.so.1 \e\fP
+        \fB\-o libdemo.so.1.0.1 libdemo.c\fP
+.fi
+.in
+.PP
+Then we construct symbolic links for the library soname and
+the library linker name:
+
+.in +4n
+.nf
+$ \fBln \-sf libdemo.so.1.0.1 libdemo.so.1\fP
+$ \fBln \-sf libdemo.so.1 libdemo.so\fP
+.fi
+.in
+.PP
+Next, we compile the main program, linking it against the shared library,
+and then list the dynamic dependencies of the program:
+
+.in +4n
+.nf
+$ \fBcc \-g \-o prog prog.c \-L. \-ldemo\fP
+$ \fBldd prog\fP
+	linux\-vdso.so.1 =>  (0x00007fff86d66000)
+	libdemo.so.1 => not found
+	libc.so.6 => /lib64/libc.so.6 (0x00007fd4dc138000)
+	/lib64/ld\-linux\-x86\-64.so.2 (0x00007fd4dc51f000)
+.fi
+.in
+.PP
+In order to get profiling information for the shared library,
+we define the environment variable
+.BR LD_PROFILE
+with the soname of the library:
+
+.in +4n
+.nf
+$ \fBexport LD_PROFILE=libdemo.so.1\fP
+.fi
+.in
+.PP
+We then define the environment variable
+.BR LD_PROFILE_OUTPUT
+with the pathname of the directory where profile output should be written,
+and create that directory if it does not exist already:
+
+.in +4n
+.nf
+$ \fBexport LD_PROFILE_OUTPUT=$(pwd)/prof_data\fP
+$ \fBmkdir \-p $LD_PROFILE_OUTPUT\fP
+.fi
+.in
+.PP
+.B LD_PROFILE
+causes profiling output to be
+.I appended
+to the output file if it already exists,
+so we ensure that there is no preexisting profiling data:
+
+.in +4n
+.nf
+$ \fBrm \-f $LD_PROFILE_OUTPUT/$LD_PROFILE.profile\fP
+.fi
+.in
+.PP
+We then run the program to produce the profiling output,
+which is written to a file in the directory specified in
+.BR LD_PROFILE_OUTPUT :
+
+.in +4n
+.nf
+$ \fBLD_LIBRARY_PATH=. ./prog\fP
+$ \fBls prof_data\fP
+libdemo.so.1.profile
+.fi
+.in
+.PP
+We then use the
+.BR "sprof \-p"
+option to generate a flat profile with counts and ticks:
+
+.in +4n
+.nf
+$ \fBsprof \-p libdemo.so.1 $LD_PROFILE_OUTPUT/libdemo.so.1.profile\fP
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls  us/call  us/call  name
+ 60.00      0.06     0.06      100   600.00           consumeCpu1
+ 40.00      0.10     0.04     1000    40.00           consumeCpu2
+  0.00      0.10     0.00        1     0.00           x1
+  0.00      0.10     0.00        1     0.00           x2
+.fi
+.in
+.PP
+The
+.BR "sprof \-q"
+option generates a call graph:
+
+.in +4n
+.nf
+$ \fBsprof \-q libdemo.so.1 $LD_PROFILE_OUTPUT/libdemo.so.1.profile\fP
+
+index % time    self  children    called     name
+
+                0.00    0.00      100/100         x1 [1]
+[0]    100.0    0.00    0.00      100         consumeCpu1 [0]
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                0.00    0.00        1/1           <UNKNOWN>
+[1]      0.0    0.00    0.00        1         x1 [1]
+                0.00    0.00      100/100         consumeCpu1 [0]
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                0.00    0.00     1000/1000        x2 [3]
+[2]      0.0    0.00    0.00     1000         consumeCpu2 [2]
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                0.00    0.00        1/1           <UNKNOWN>
+[3]      0.0    0.00    0.00        1         x2 [3]
+                0.00    0.00     1000/1000        consumeCpu2 [2]
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+.fi
+.in
+.PP
+Above and below, the "<UNKNOWN>" strings represent identifiers that
+are outside of the profiled object (in this example, these are instances of
+.IR main() ).
+.PP
+The
+.BR "sprof \-c"
+option generates a list of call pairs and the number of their occurrences:
+
+.in +4n
+.nf
+$ \fBsprof \-c libdemo.so.1 $LD_PROFILE_OUTPUT/libdemo.so.1.profile\fP
+<UNKNOWN>                  x1                                 1
+x1                         consumeCpu1                      100
+<UNKNOWN>                  x2                                 1
+x2                         consumeCpu2                     1000
+.fi
+.in
+.SH SEE ALSO
+.BR gprof (1),
+.BR ldd (1),
+.BR ld.so (8)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.
+.\" Copyright Andries Brouwer, 2000
+.\" Some fragments of text came from the time-1.7 info file.
+.\" Inspired by kromJx@crosswinds.net.
+.\"
+.\" %%%LICENSE_START(GPL_NOVERSION_ONELINE)
+.\" Distributed under GPL
+.\" %%%LICENSE_END
+.\"
+.TH TIME 1 2015-02-21 "" "Linux User's Manual"
+.SH NAME
+time \- time a simple command or give resource usage
+.SH SYNOPSIS
+.BI "time [" options "] " command " [" arguments... "] "
+.SH DESCRIPTION
+The
+.B time
+command runs the specified program
+.I command
+with the given arguments.
+When
+.I command
+finishes,
+.B time
+writes a message to standard error giving timing statistics
+about this program run.
+These statistics consist of (i) the elapsed real time
+between invocation and termination, (ii) the user CPU time
+(the sum of the
+.I tms_utime
+and
+.I tms_cutime
+values in a
+.I "struct tms"
+as returned by
+.BR times (2)),
+and (iii) the system CPU time (the sum of the
+.I  tms_stime
+and
+.I tms_cstime
+values in a
+.I "struct tms"
+as returned by
+.BR times (2)).
+
+Note: some shells (e.g.,
+.BR bash (1))
+have a built-in
+.B time
+command that provides less functionality than the command described here.
+To access the real command, you may need to specify its pathname
+(something like
+.IR /usr/bin/time ).
+.SH OPTIONS
+.TP
+.B \-p
+When in the POSIX locale, use the precise traditional format
+.IP
+.in +4n
+"real %f\enuser %f\ensys %f\en"
+.in
+.IP
+(with numbers in seconds)
+where the number of decimals in the output for %f is unspecified
+but is sufficient to express the clock tick accuracy, and at least one.
+.SH EXIT STATUS
+If
+.I command
+was invoked, the exit status is that of
+.IR command .
+Otherwise, it is 127 if
+.I command
+could not be found, 126 if it could be found but could not be invoked,
+and some other nonzero value (1-125) if something else went wrong.
+.SH ENVIRONMENT
+The variables
+.BR LANG ,
+.BR LC_ALL ,
+.BR LC_CTYPE ,
+.BR LC_MESSAGES ,
+.BR LC_NUMERIC ,
+.BR NLSPATH ,
+and
+.B PATH
+are used.
+The last one to search for
+.IR command .
+The remaining ones for the text and formatting of the output.
+.SH GNU VERSION
+Below a description of the GNU 1.7 version of
+.BR time .
+Disregarding the name of the utility, GNU makes it output lots of
+useful information, not only about time used, but also on other
+resources like memory, I/O and IPC calls (where available).
+The output is formatted using a format string that can be specified
+using the
+.I \-f
+option or the
+.B TIME
+environment variable.
+.LP
+The default format string is:
+.PP
+.in +4n
+%Uuser %Ssystem %Eelapsed %PCPU (%Xtext+%Ddata %Mmax)k
+.br
+%Iinputs+%Ooutputs (%Fmajor+%Rminor)pagefaults %Wswaps
+.br
+.in
+.LP
+When the
+.I \-p
+option is given the (portable) output format
+.PP
+.in +4n
+real %e
+.br
+user %U
+.br
+sys %S
+.br
+.in
+.PP
+is used.
+.SS The format string
+The format is interpreted in the usual printf-like way.
+Ordinary characters are directly copied, tab, newline
+and backslash are escaped using \et, \en and \e\e,
+a percent sign is represented by %%, and otherwise %
+indicates a conversion.
+The program
+.B time
+will always add a trailing newline itself.
+The conversions follow.
+All of those used by
+.BR tcsh (1)
+are supported.
+.LP
+.B "Time"
+.TP
+.B %E
+Elapsed real time (in [hours:]minutes:seconds).
+.TP
+.B %e
+(Not in
+.BR tcsh (1).)
+Elapsed real time (in seconds).
+.TP
+.B %S
+Total number of CPU-seconds that the process spent in kernel mode.
+.TP
+.B %U
+Total number of CPU-seconds that the process spent in user mode.
+.TP
+.B %P
+Percentage of the CPU that this job got, computed as (%U + %S) / %E.
+.LP
+.B "Memory"
+.TP
+.B %M
+Maximum resident set size of the process during its lifetime, in Kbytes.
+.TP
+.B %t
+(Not in
+.BR tcsh (1).)
+Average resident set size of the process, in Kbytes.
+.TP
+.B %K
+Average total (data+stack+text) memory use of the process,
+in Kbytes.
+.TP
+.B %D
+Average size of the process's unshared data area, in Kbytes.
+.TP
+.B %p
+(Not in
+.BR tcsh (1).)
+Average size of the process's unshared stack space, in Kbytes.
+.TP
+.B %X
+Average size of the process's shared text space, in Kbytes.
+.TP
+.B %Z
+(Not in
+.BR tcsh (1).)
+System's page size, in bytes.
+This is a per-system constant, but varies between systems.
+.TP
+.B %F
+Number of major page faults that occurred while the process was running.
+These are faults where the page has to be read in from disk.
+.TP
+.B %R
+Number of minor, or recoverable, page faults.
+These are faults for pages that are not valid but which have
+not yet been claimed by other virtual pages.
+Thus the data
+in the page is still valid but the system tables must be updated.
+.TP
+.B %W
+Number of times the process was swapped out of main memory.
+.TP
+.B %c
+Number of times the process was context-switched involuntarily
+(because the time slice expired).
+.TP
+.B %w
+Number of waits: times that the program was context-switched voluntarily,
+for instance while waiting for an I/O operation to complete.
+.LP
+.B "I/O"
+.TP
+.B %I
+Number of filesystem inputs by the process.
+.TP
+.B %O
+Number of filesystem outputs by the process.
+.TP
+.B %r
+Number of socket messages received by the process.
+.TP
+.B %s
+Number of socket messages sent by the process.
+.TP
+.B %k
+Number of signals delivered to the process.
+.TP
+.B %C
+(Not in
+.BR tcsh (1).)
+Name and command-line arguments of the command being timed.
+.TP
+.B %x
+(Not in
+.BR tcsh (1).)
+Exit status of the command.
+.SS GNU options
+.TP
+.BI "\-f " format ", \-\-format=" format
+Specify output format, possibly overriding the format specified
+in the environment variable TIME.
+.TP
+.B "\-p, \-\-portability"
+Use the portable output format.
+.TP
+.BI "\-o " file ", \-\-output=" file
+Do not send the results to
+.IR stderr ,
+but overwrite the specified file.
+.TP
+.B "\-a, \-\-append"
+(Used together with \-o.) Do not overwrite but append.
+.TP
+.B "\-v, \-\-verbose"
+Give very verbose output about all the program knows about.
+.SS GNU standard options
+.TP
+.B "\-\-help"
+Print a usage message on standard output and exit successfully.
+.TP
+.B "\-V, \-\-version"
+Print version information on standard output, then exit successfully.
+.TP
+.B "\-\-"
+Terminate option list.
+.SH BUGS
+Not all resources are measured by all versions of UNIX,
+so some of the values might be reported as zero.
+The present selection was mostly inspired by the data
+provided by 4.2 or 4.3BSD.
+.LP
+GNU time version 1.7 is not yet localized.
+Thus, it does not implement the POSIX requirements.
+.LP
+The environment variable
+.B TIME
+was badly chosen.
+It is not unusual for systems like
+.BR autoconf (1)
+or
+.BR make (1)
+to use environment variables with the name of a utility to override
+the utility to be used.
+Uses like MORE or TIME for options to programs
+(instead of program pathnames) tend to lead to difficulties.
+.LP
+It seems unfortunate that
+.I \-o
+overwrites instead of appends.
+(That is, the
+.I \-a
+option should be the default.)
+.LP
+Mail suggestions and bug reports for GNU
+.B time
+to
+.br
+.I bug\-utils@prep.ai.mit.edu
+.br
+Please include the version of
+.BR time ,
+which you can get by running
+.br
+.I time \-\-version
+.br
+and the operating system
+and C compiler you used.
+.\" .SH AUTHORS
+.\" .TP
+.\" .IP "David Keppel"
+.\" Original version
+.\" .IP "David MacKenzie"
+.\" POSIXization, autoconfiscation, GNU getoptization,
+.\" documentation, other bug fixes and improvements.
+.\" .IP "Arne Henrik Juul"
+.\" Helped with portability
+.\" .IP "Francois Pinard"
+.\" Helped with portability
+.SH SEE ALSO
+.BR tcsh (1),
+.BR times (2),
+.BR wait3 (2)
+.SH COLOPHON
+This page is part of release 4.00 of the Linux
+.I man-pages
+project.
+A description of the project,
+information about reporting bugs,
+and the latest version of this page,
+can be found at
+\%http://www.kernel.org/doc/man\-pages/.

@@ -1,20 +1,12 @@
-# manpages-pdf
+# man2pdf
 
-## mar 1, 2015
+## May 31, 2015
 
-1. rendered with groff, based on the linux man pages project 3.80 release.
+1. Added a shell script to automate the converting process.
 
-2. no duplicates. with bookmarks.
+2. Updated to man-pages-4.00.
 
-3. man pages contained (including the intro pages)
+## TODO
 
-+ man1 -- 12 man pages.
-+ man2 -- 250 man pages.
-+ man3 -- 558 man pages.
-+ man4 -- 29 man pages.
-+ man5 -- 36 man pages.
-+ man6 -- 1 man pages.
-+ man7 -- 94 man pages.
-+ man8 -- 9 man pages.
-
-totally 989.
+1. Adding the functionality of
+producing the syscall-number-ordered version of man2.
