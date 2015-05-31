@@ -7,7 +7,7 @@
 ```
 
 where the `path-to-man-pages-directory`
-is the root directory of decompressed the man-pages release,
+is the root directory of the decompressed man-pages release,
 which is available at
 [The Linux man-pages project](https://www.kernel.org/doc/man-pages/).
 
@@ -15,7 +15,7 @@ which is available at
 
 - pdfroff, which comes from the package groff
 
-- [pdfbookmark](https://github.com/NoviceLive/pdfbookmark)
+- [pdfbookmark](https://github.com/NoviceLive/pdfbookmark), I wrote
 
 ## TODO
 
