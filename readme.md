@@ -11,6 +11,12 @@ is the root directory of the decompressed man-pages release,
 which is available at
 [The Linux man-pages project](https://www.kernel.org/doc/man-pages/).
 
+## Output
+
+Eight manuals in PDF format, and one 32.pdf and a 64.pdf.
+
+Note _pdf is merely a temporay directory.
+
 ## Dependencies
 
 - pdfroff, which comes from the package groff
@@ -18,6 +24,3 @@ which is available at
 - [pdfbookmark](https://github.com/NoviceLive/pdfbookmark), I wrote
 
 ## TODO
-
-- Adding the functionality of
-producing the syscall-number-ordered version of man2
