@@ -46,7 +46,7 @@ do
 done
 
 
-# for convert 32 and 64
+# for converting 32- and 64-bit syscall-number-ordered manual section 2
 ln -srf "$1"/man2 man2
 ln -srf "$1"/man3 man3
 
