@@ -65,3 +65,6 @@ do
     output=$(basename -s .pdf $k).pdf
     pdfbookmark $k -o $output -r $regex || exit 233
 done
+
+
+rm -rf $temp_dir || exit 233
