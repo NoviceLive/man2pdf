@@ -23,4 +23,9 @@ Note _pdf is merely a temporay directory.
 
 - [pdfbookmark](https://github.com/NoviceLive/pdfbookmark), I wrote
 
+## NOTE
+
+For those who just want the generated PDFs,
+you had better clone with `--depth 1`.
+
 ## TODO
