@@ -1,5 +1,5 @@
-# manpages2pdf
-# man 格式转 PDF
+# man2pdf
+# Man 格式转 PDF
 
 ![](screenshot.png)
 
@@ -66,4 +66,5 @@ For man pages, see their own description.
 For this script, GPL.
 
 Man 手册的授权请看它发行所带的授权文件。
+
 该转换脚本 GPL。
