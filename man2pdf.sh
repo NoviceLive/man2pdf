@@ -4,13 +4,11 @@
 #
 # Convert Man Pages In Man Format To PDF Format With Bookmarks
 #
-# 31 May 2015
-#
-# Copyright (C) 2015 谷征雄 (rectigu@gmail.com, http://novicelive.org/)
+# Copyright 2015 Gu Zhengxiong <rectigu@gmail.com>
 #
 
 
-temp_dir='_pdf'
+temp_dir='_build'
 
 test $# -eq 1 || exit 233
 rm -rf $temp_dir || exit 233
