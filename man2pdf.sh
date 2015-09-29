@@ -44,7 +44,8 @@ do
 done
 
 
-# for converting 32- and 64-bit syscall-number-ordered manual section 2
+# For converting 32- and 64-bit syscall-number-ordered
+# manual section 2.
 ln -srf "$1"/man2 man2
 ln -srf "$1"/man3 man3
 
@@ -66,3 +67,4 @@ done
 
 
 rm -rf $temp_dir || exit 233
+mkdir -p build && mv *.pdf build/ || exit 233
