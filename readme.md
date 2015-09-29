@@ -1,4 +1,6 @@
-# man2pdf - Converting Man Pages To PDF With Bookmarks
+# man2pdf
+
+Convert Man Pages To PDF With Bookmarks.
 
 ![](screenshot.png)
 
