@@ -33,7 +33,7 @@ Dependencies
 
 -  pdfroff, which comes from the package ``groff``
 -  powerful unix tools such as ``grep``
--  `pdfbookmark <https://github.com/NoviceLive/pdfbookmark>`__, I wrote
+-  `pdfmark <https://github.com/NoviceLive/pdfmark>`__, I wrote
 
 NOTE
 ----

@@ -62,7 +62,7 @@ regex='(?<=\nNAME\n)[\/_a-zA-RT-Z](.+|.+\n)+(?=\n(SYNOPSIS|DESC|CONFIG|\.))'
 for k in $temp_dir/*.pdf
 do
     output=$(basename -s .pdf $k).pdf
-    pdfbookmark $k -o $output -r $regex || exit 233
+    pdfmark $k -o $output -r $regex || exit 233
 done
 
 
